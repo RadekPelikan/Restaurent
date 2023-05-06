@@ -38,7 +38,7 @@ model Address {
   postalCode String
   country    String
 
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId String     @unique
 
   createdAt DateTime @default(now())
@@ -52,7 +52,7 @@ model Table {
   isOutside   Boolean
   isAvailable Boolean
 
-  restaurant    Restaurant     @relation(fields: [restaurantId], references: [id])
+  restaurant    Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   restaurantId  String
   TablePosition TablePosition?
 
@@ -68,7 +68,7 @@ model TablePosition {
   endY   Int
   room   Int
 
-  table   Table  @relation(fields: [tableId], references: [id])
+  table   Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
   tableId String @unique
 
   createdAt DateTime @default(now())

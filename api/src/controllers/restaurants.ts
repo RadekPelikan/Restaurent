@@ -28,8 +28,12 @@ const prepareRestaurant = (restaurant: any) => {
   return restaurantObj;
 };
 
-const getRestaurants = async (req: Request, res: Response) => {
+const getAllRestaurants = async (req: Request, res: Response) => {
   try {
+    // const auth = req.oidc.isAuthenticated() ? "Logged in" : "Logged out";
+
+    // console.log({ auth });
+
     const includeParams = req.query.include as string[];
     const include = {
       address: includeParams?.includes("address"),
@@ -59,8 +63,6 @@ const getRestaurant = async (req: Request, res: Response) => {
 
     const { id } = req.params;
 
-    console.log({ id });
-
     const restaurant = await prisma.restaurant.findUnique({
       where: { id },
       include,
@@ -78,9 +80,49 @@ const getRestaurant = async (req: Request, res: Response) => {
   }
 };
 
-const createRestaurant = async (req: Request, res: Response) => {};
+const createRestaurant = async (req: Request, res: Response) => {
+  try {
+    const { name, address, tables } = req.body;
+
+    const restaurant = await prisma.restaurant.create({
+      data: {
+        name,
+        address: {
+          create: address,
+        },
+        table: {
+          create: tables,
+        },
+      },
+    });
+
+    const item = prepareRestaurant(restaurant);
+
+    res.status(201).json(item);
+  } catch (err: any) {
+    handleError[500](res, err.message);
+  }
+};
+
+const deleteAllRestaurants = async (req: Request, res: Response) => {
+  try {
+    const deletedItems = await prisma.restaurant.findMany({
+      select: { id: true, name: true },
+    });
+    const { count } = await prisma.restaurant.deleteMany({});
+
+    res.json({
+      count,
+      items: deletedItems,
+    });
+  } catch (err: any) {
+    handleError[500](res, err.message);
+  }
+};
 
 export default {
-  getRestaurants,
+  getAllRestaurants,
   getRestaurant,
+  createRestaurant,
+  deleteAllRestaurants,
 };
